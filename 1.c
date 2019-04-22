@@ -5,7 +5,7 @@
 #include <pmmintrin.h>
 
 typedef struct {
-    float x, y, z, w;
+    float w, x, y, z;
 } cuaternion;
 
 void imprimir_cuaternion(cuaternion c) {
@@ -22,10 +22,10 @@ void inicializar_cuaternion(cuaternion *q) {
 cuaternion multiplicar_cuaternion(cuaternion a, cuaternion b) {
     cuaternion c;
 
-    c.x = a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x;
-    c.y = -a.x * b.z + a.y * b.w + a.z * b.x + a.w * b.y;
-    c.z = a.x * b.y - a.y * b.x + a.z * b.w + a.w * b.z;
-    c.w = -a.x * b.x - a.y * b.y - a.z * b.z + a.w * b.w;
+    c.w = a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w;
+    c.x = -a.w * b.y + a.x * b.z + a.y * b.w + a.z * b.x;
+    c.y = a.w * b.x - a.x * b.w + a.y * b.z + a.z * b.y;
+    c.z = -a.w * b.w - a.x * b.x - a.y * b.y + a.z * b.z;
 
     return c;
 }
@@ -33,10 +33,10 @@ cuaternion multiplicar_cuaternion(cuaternion a, cuaternion b) {
 cuaternion sumar_cuaternion(cuaternion a, cuaternion b) {
     cuaternion c;
 
+    c.w = a.w + b.w;
     c.x = a.x + b.x;
     c.y = a.y + b.y;
     c.z = a.z + b.z;
-    c.w = a.w + b.w;
 
     return c;
 }
@@ -113,20 +113,20 @@ int main(int argc, char* argv[]) {
     /* Inicializacion de valores de cuaterniones del vector a de cuaterniones */
     for (int i = 0; i < N; i++)
     {
+        quat.w = (float) (rand() % 10);
         quat.x = (float) (rand() % 10);
         quat.y = (float) (rand() % 10);
         quat.z = (float) (rand() % 10);
-        quat.w = (float) (rand() % 10);
         a[i] = quat;
     }
     
     /* Inicializacion de valores de cuaterniones del vector b de cuaterniones */
     for (int i = 0; i < N; i++)
     {
+        quat.w = (float) (rand() % 10);
         quat.x = (float) (rand() % 10);
         quat.y = (float) (rand() % 10);
         quat.z = (float) (rand() % 10);
-        quat.w = (float) (rand() % 10);
         b[i] = quat;
     }
 

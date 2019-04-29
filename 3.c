@@ -44,8 +44,47 @@ double get_counter(){
 void _mm_imprimir(__m128 var) {
     float s[4];
     _mm_store_ps(&s[0], var);
-    printf("Valor: %f %f %f %f\n", s[3], s[2], s[1], s[0]);
+    printf("Valor: %f %f %f %f\n", s[0], s[1], s[2], s[3]);
     
+}
+
+__m128 _mm_multiplicar(__m128 a, __m128 b) {
+    float elementos_a[4];
+    __m128 resultado;
+    _mm_store_ps(elementos_a, a);
+
+    /* Vectores negativos */
+    __m128 neg1 = _mm_set_ps(-1.0, 1.0, -1.0, 1.0);
+    __m128 neg2 = _mm_set_ps(-1.0, -1.0, 1.0, 1.0);
+    __m128 neg3 = _mm_set_ps(-1.0, 1.0, 1.0, -1.0);
+    __m128 neg4 = _mm_set_ps(1.0, 1.0, 1.0, 1.0);
+
+    /* Vectores auxiliares */
+    __m128 vector_w = _mm_set1_ps(elementos_a[0]);
+    __m128 vector_x = _mm_set1_ps(elementos_a[1]);
+    __m128 vector_y = _mm_set1_ps(elementos_a[2]);
+    __m128 vector_z = _mm_set1_ps(elementos_a[3]);
+        
+    /* Shuffle de vector b */
+    __m128 aux1 = _mm_shuffle_ps(b, b, _MM_SHUFFLE(0, 1, 2, 3));
+    __m128 aux2 = _mm_shuffle_ps(b, b, _MM_SHUFFLE(1, 0, 3, 2));
+    __m128 aux3 = _mm_shuffle_ps(b, b, _MM_SHUFFLE(2, 3, 0, 1));
+    __m128 aux4;
+
+    /* Multiplicacion por vectores negativos */
+    aux1 = _mm_mul_ps(aux1, neg1);
+    aux2 = _mm_mul_ps(aux2, neg2);
+    aux3 = _mm_mul_ps(aux3, neg3);
+
+    /* Multiplicacion final */
+    aux1 = _mm_mul_ps(vector_w, aux1);
+    aux2 = _mm_mul_ps(vector_x, aux2);
+    aux3 = _mm_mul_ps(vector_y, aux3);
+    aux4 = _mm_mul_ps(vector_z, b);
+
+    resultado = _mm_add_ps(_mm_add_ps(aux1, aux2), _mm_add_ps(aux3, aux4));
+
+    return resultado;
 }
 
 int main(int argc, char* argv[]) {
@@ -89,6 +128,7 @@ int main(int argc, char* argv[]) {
         float y = (float) (rand() % 10);
         float w = (float) (rand() % 10);
         a[i] = _mm_set_ps(z, y, x, w);
+        a[i] = _mm_set_ps(6.0, 4.0, 2.0, 0.0);
     }
     
     /* Inicializacion de valores de cuaterniones del vector b de cuaterniones */
@@ -99,47 +139,12 @@ int main(int argc, char* argv[]) {
         float y = (float) (rand() % 10);
         float w = (float) (rand() % 10);
         b[i] = _mm_set_ps(z, y, x, w);
+        b[i] = _mm_set_ps(40.0, 30.0, 20.0, 10.0);
     }
-
-    /*
-    __m128 temporal = _mm_set_ps(1.0, 2.0, 3.0, 4.0);
-    _mm_imprimir(temporal);
-    __m128 multiplicacion = _mm_set_ps(1.0, 1.0, -1.0, 1.0);
-    __m128 asdf = _mm_shuffle_ps(temporal, temporal, _MM_SHUFFLE(0, -1, 2, 3));
-    __m128 qwer = _mm_shuffle_ps(temporal, temporal, _MM_SHUFFLE(2, 3, 0, 1));
-    __m128 zxcv = _mm_shuffle_ps(temporal, temporal, _MM_SHUFFLE(1, 0, 3, 2));
-    __m128 resultado = _mm_mul_ps(asdf, multiplicacion);
-    _mm_imprimir(asdf);
-    _mm_imprimir(qwer);
-    _mm_imprimir(zxcv);
-    _mm_imprimir(resultado);
-    */
-    
-    __m128 neg1 = _mm_set_ps(1.0, -1.0, 1.0, 1.0);
-    __m128 neg2 = _mm_set_ps(1.0, 1.0, 1.0, -1.0);
-    __m128 neg3 = _mm_set_ps(1.0, 1.0, -1.0, 1.0);
-    __m128 neg4 = _mm_set_ps(1.0, -1.0, -1.0, -1.0);
 
     /* Multiplicacion cuaternion auxiliar */
     for (int i = 0; i < 1; i++) {
-        aux1 = _mm_shuffle_ps(b[i], b[i], _MM_SHUFFLE(0, 1, 2, 3));
-        aux1 = _mm_mul_ps(aux1, neg1);
-        aux2 = _mm_shuffle_ps(b[i], b[i], _MM_SHUFFLE(2, 3, 0, 1));
-        aux2 = _mm_mul_ps(aux2, neg2);
-        aux3 = _mm_shuffle_ps(b[i], b[i], _MM_SHUFFLE(1, 0, 3, 2));
-        aux3 = _mm_mul_ps(aux3, neg3);
-        aux4 = b[i];
-        aux4 = _mm_mul_ps(aux4, neg4);
-        _mm_imprimir(b[i]);
-        _mm_imprimir(aux1);
-        _mm_imprimir(aux2);
-        _mm_imprimir(aux3);
-        _mm_imprimir(aux4);
-        aux4 = _mm_mul_ps(aux4, neg4);
-        aux1 = _mm_mul_ps(a[i], aux1);
-        aux2 = _mm_mul_ps(a[i], aux2);
-        aux3 = _mm_mul_ps(a[i], aux3);
-        aux4 = _mm_mul_ps(a[i], aux4);
+        c[i] = _mm_multiplicar(a[i], b[i]);
     }
     
 

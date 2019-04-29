@@ -9,14 +9,14 @@ typedef struct {
 } cuaternion;
 
 void imprimir_cuaternion(cuaternion c) {
-    printf("%.2f %.2f %.2f %.2f\n", c.x, c.y, c.z, c.w);
+    printf("%.2f %.2f %.2f %.2f\n", c.w, c.x, c.y, c.z);
 }
 
 void inicializar_cuaternion(cuaternion *q) {
+    (*q).w = 0.0f;
     (*q).x = 0.0f;
     (*q).y = 0.0f;
     (*q).z = 0.0f;
-    (*q).w = 0.0f;
 }
 
 cuaternion multiplicar_cuaternion(cuaternion a, cuaternion b) {
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
     }
 
     /* Multiplicacion cuaternion auxiliar */
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < 1; i++) {
         c[i] = multiplicar_cuaternion(a[i], b[i]);
     }
 
@@ -149,7 +149,6 @@ int main(int argc, char* argv[]) {
     imprimir_cuaternion(dp);
     printf("Ciclos: %1.lf\n", ck);
     fprintf(ptr, "%d, %1.lf\n", n, ck);
-
     /* Cierre de fichero */
     fclose(ptr);
 

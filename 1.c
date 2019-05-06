@@ -60,11 +60,10 @@ int main(int argc, char* argv[]) {
 		b[i] = quat;	
 	}
 	
-
-	start_counter();  // START COUNTER
-
 	/* Inicializacion cuaternion dp */
 	inicializar_cuaternion(&dp);
+
+	start_counter();  // START COUNTER
 
 	/* MULTIPLICACION C = A * B */
 	for (int i = 0; i < 1; i++) {

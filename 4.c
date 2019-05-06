@@ -60,6 +60,10 @@ int main(int argc, char* argv[]) {
 		inicializar_cuaternion_rand(&quat);
 		b[i] = quat;	
 	}
+	
+	/* Inicializacion cuaternion dp */
+	inicializar_cuaternion(&dp);
+		
 
 	start_counter();  // START COUNTER
 
@@ -72,11 +76,6 @@ int main(int argc, char* argv[]) {
 			c[i] = multiplicar_cuaternion(a[i], b[i]);
 		}
 		
-		#pragma omp single
-		{
-			/* Inicializacion cuaternion dp */
-			inicializar_cuaternion(&dp);
-		}
 
 		#pragma omp barrier
 		

@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 	__m128 quat, dp, aux1, aux2, aux3, aux4;
 	FILE *ptr;
 
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("Debes introducir el argumento q y el nombre del archivo resultante.\n");
 		return 1;
 	}
@@ -33,6 +33,7 @@ int main(int argc, char* argv[]) {
 		printf("Error al abrir el archivo");
 		exit(1);
 	}
+    fprintf(ptr, "Iteracion %d\n", atoi(argv[3]));
 	fprintf(ptr, "q, ciclos\n");
 	
 
@@ -53,7 +54,6 @@ int main(int argc, char* argv[]) {
 		float y = (float) (rand() % 10);
 		float w = (float) (rand() % 10);
 		a[i] = _mm_set_ps(z, y, x, w);
-		a[i] = _mm_set_ps(6.0, 4.0, 2.0, 0.0);
 	}
 	
 	/* Inicializacion de valores de cuaterniones del vector b de cuaterniones */
@@ -64,7 +64,6 @@ int main(int argc, char* argv[]) {
 		float y = (float) (rand() % 10);
 		float w = (float) (rand() % 10);
 		b[i] = _mm_set_ps(z, y, x, w);
-		b[i] = _mm_set_ps(40.0, 30.0, 20.0, 10.0);
 	}
 
 	/* Inicializacion cuaternion dp */
@@ -88,7 +87,7 @@ int main(int argc, char* argv[]) {
 	
 	printf("cuaternion dp: ");
 	_mm_imprimir(dp);
-	printf("Ciclos: %1.lf\n", ck);
+	printf("Ciclos: %1.2f\n", ck);
 	fprintf(ptr, "%d, %1.lf\n", q, ck);
 	
 	/* Cierre de fichero */

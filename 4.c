@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 	cuaternion quat, dp;
 	FILE *ptr;
 
-	if (argc != 4) {
+	if (argc != 5) {
 		printf("Debes introducir el argumento q, el nombre del archivo resultante y el numero de hilos.\n");
 		return 1;
 	}
@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
 		printf("Error abrindo archivo\n");
 		exit(1);
 	}
-	fprintf(ptr, "q, ciclos\n");	
+	fprintf(ptr, "Iteracion %d\n", atoi(argv[4]));
+	fprintf(ptr, "hilos, q, ciclos\n");	
 
 	srand(time(NULL));
 	q = atoi(argv[1]);
@@ -72,7 +73,7 @@ int main(int argc, char* argv[]) {
 		
 		#pragma omp for
 		/* MULTIPLICACION C = A * B */
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < N; i++) {
 			c[i] = multiplicar_cuaternion(a[i], b[i]);
 		}
 		
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
 	printf("Cuaternion dp: ");
 	imprimir_cuaternion(dp);
 	printf("Ciclos: %1.lf\n", ck);
-	fprintf(ptr, "%d, %1.lf\n", q, ck);
+	fprintf(ptr, "%d, %d, %1.lf\n", k, q, ck);
 	/* Cierre de fichero */
 	fclose(ptr);
 

@@ -67,6 +67,8 @@ int main(int argc, char* argv[]) {
 		b[i] = _mm_set_ps(40.0, 30.0, 20.0, 10.0);
 	}
 
+	/* Inicializacion cuaternion dp */
+	dp = _mm_setzero_ps();
 
 	start_counter();
 	/* MULTIPLICACION C = A * B */
@@ -74,8 +76,6 @@ int main(int argc, char* argv[]) {
 		c[i] = _mm_multiplicar(a[i], b[i]);
 	}
 
-	/* Inicializacion cuaternion dp */
-	dp = _mm_setzero_ps();
 
 	/*SUMA Y MULTIPLICACION DP = DP + A * B */
 	for (int i = 0; i < N; i++){

@@ -62,6 +62,12 @@ int main(int argc, char* argv[]) {
 	
 	/* Inicializacion cuaternion dp */
 	inicializar_cuaternion(&dp);
+<<<<<<< HEAD
+=======
+
+	start_counter();  // START COUNTER
+
+>>>>>>> master
 
 	start_counter();  // START COUNTER
 

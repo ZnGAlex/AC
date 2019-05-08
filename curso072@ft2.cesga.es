@@ -7,19 +7,18 @@
 #SBATCH -C has2s
 #SBATCH -t 00:00:45
 
-# module load intel
+module load intel
 
 n=(2 4 6 7)
 nombre=("1" "1op" "3a" "4")
 hilos=(1 2 4 8 16)
-iteraciones=(1 2 3 4 5 6 7 8 9 10)
 
-gcc -O0 1.c -o 1 -lm
-gcc -O2 1.c -o 1op -lm
+icc -O0 1.c -o 1
+icc -O2 1.c -o 1op
 ## gcc 2.c -o 2 -lm
-gcc -O0  3a.c -o 3a -lm -msse3
+icc -O0  3a.c -o 3a
 ## gcc 3b.c -o 3b -lm -msse3
-gcc -O0 4.c -o 4 -lm -fopenmp
+icc -O0 -qopenmp 4.c -o 4
 
 for i in "${nombre[@]}"
 do
@@ -32,16 +31,10 @@ do
 			for k in "${hilos[@]}"
 			do
 				echo "***** Hilos: $k *****"
-				for it in "${iteraciones[@]}"
-				do
-					./$i $j ./resultados/$i/resultados_$k.csv $k $it
-				done
+				./$i $j ./resultados/$i/resultados_$k.csv $k
 			done
 		else
-			for it in "${iteraciones[@]}"
-			do
-				./$i $j ./resultados/$i/resultados.csv $it
-			done
+			./$i $j ./resultados/$i/resultados.csv
 		fi
 	done
 done

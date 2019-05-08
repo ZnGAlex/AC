@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 	cuaternion quat, dp;
 	FILE *ptr;
 
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("Debes introducir el argumento q y el nombre del archivo resultante.\n");
 		return 1;
 	}
@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
 		printf("Error abrindo archivo\n");
 		exit(1);
 	}
+	fprintf(ptr, "Iteracion %d\n", atoi(argv[3]));
 	fprintf(ptr, "q, ciclos\n");	
 
 	srand(time(NULL));
@@ -64,7 +65,6 @@ int main(int argc, char* argv[]) {
 	inicializar_cuaternion(&dp);
 
 	start_counter();  // START COUNTER
-
 
 	/* MULTIPLICACION C = A * B */
 	for (int i = 0; i < N; i++) {

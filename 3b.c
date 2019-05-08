@@ -14,20 +14,30 @@ double get_counter();
 
 //Funciones cuaterniones
 void _mm_imprimir(__m128 var);
-__m128 _mm_multiplicar(__m128 a, __m128 b);
+__m128 *_mm_multiplicar(__m128 a[4], __m128 b[4]);
 
 int main(int argc, char* argv[]) {
 	double ck;
 	int q;
 	int N;
 	__m128 *a, *b, *c;
-	__m128 quat, dp, aux1, aux2, aux3, aux4;
+	__m128 quat, dp, aux1[4];
+	__m128 *aux;
 	FILE *ptr;
 
 	if (argc != 3) {
 		printf("Debes introducir el argumento q y el nombre del archivo resultante.\n");
 		return 1;
 	}
+
+	srand(time(NULL));
+	q = atoi(argv[1]);
+	N = pow(10.0, q);
+	if (N%4 != 0){
+		printf("q no válido\n");
+		exit(1);
+	}
+
 	/* Apertura de fichero */
 	if((ptr = fopen(argv[2], "a")) == NULL){
 		printf("Error al abrir el archivo");
@@ -35,10 +45,6 @@ int main(int argc, char* argv[]) {
 	}
 	fprintf(ptr, "q, ciclos\n");
 	
-
-	srand(time(NULL));
-	q = atoi(argv[1]);
-	N = pow(10.0, q);
 	
 	/* Reserva de memoria para vectores de cuaterniones */
 	a = (__m128 *) _mm_malloc(N * sizeof(__m128), 16);
@@ -53,7 +59,6 @@ int main(int argc, char* argv[]) {
 		float y = (float) (rand() % 10);
 		float w = (float) (rand() % 10);
 		a[i] = _mm_set_ps(z, y, x, w);
-		a[i] = _mm_set_ps(6.0, 4.0, 2.0, 0.0);
 	}
 	
 	/* Inicializacion de valores de cuaterniones del vector b de cuaterniones */
@@ -64,7 +69,6 @@ int main(int argc, char* argv[]) {
 		float y = (float) (rand() % 10);
 		float w = (float) (rand() % 10);
 		b[i] = _mm_set_ps(z, y, x, w);
-		b[i] = _mm_set_ps(40.0, 30.0, 20.0, 10.0);
 	}
 
 	/* Inicializacion cuaternion dp */
@@ -72,14 +76,30 @@ int main(int argc, char* argv[]) {
 
 	start_counter();
 	/* MULTIPLICACION C = A * B */
-	for (int i = 0; i < N; i++) {
-		c[i] = _mm_multiplicar(a[i], b[i]);
+	for (int i = 0; i < N; i+=4) {
+		aux = _mm_multiplicar(&a[i], &b[i]);
+		c[i] = aux[0];
+		c[i+1] = aux[1];
+		c[i+2] = aux[2];
+		c[i+3] = aux[3];
+
+		free(aux);
 	}
 
 
 	/*SUMA Y MULTIPLICACION DP = DP + A * B */
-	for (int i = 0; i < N; i++){
-		dp = _mm_add_ps(dp, _mm_multiplicar(c[i], c[i]));
+	for (int i = 0; i < N; i+=4){
+		aux1[0] = c[i];
+		aux1[1] = c[i+1];
+		aux1[2] = c[i+2];
+		aux1[3] = c[i+3];
+		aux = _mm_multiplicar(&c[i], aux1);
+		dp = _mm_add_ps(dp, aux[0]);
+		dp = _mm_add_ps(dp, aux[1]);
+		dp = _mm_add_ps(dp, aux[2]);
+		dp = _mm_add_ps(dp, aux[3]);
+
+		free(aux);
 	}
 	ck = get_counter();
 	
@@ -102,6 +122,23 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
+void juntarWXYZ(__m128 a[]){
+	float a0[4],a1[4],a2[4],a3[4];
+	
+	_mm_store_ps(a0, a[0]);
+	_mm_store_ps(a1, a[1]);
+	_mm_store_ps(a2, a[2]);
+	_mm_store_ps(a3, a[3]);
+
+	a[0] = _mm_set_ps(a3[0], a2[0], a1[0], a0[0]);
+	a[1] = _mm_set_ps(a3[1], a2[1], a1[1], a0[1]);
+	a[2] = _mm_set_ps(a3[2], a2[2], a1[2], a0[2]);
+	a[3] = _mm_set_ps(a3[3], a2[3], a1[3], a0[3]);
+}
+
+void separarWXYZ(__m128 a[]){
+	juntarWXYZ(a);
+}
 
 void _mm_imprimir(__m128 var) {
 	float s[4];
@@ -110,16 +147,33 @@ void _mm_imprimir(__m128 var) {
 	
 }
 
-__m128 _mm_multiplicar(__m128 a[4], __m128 b[4]) {
-	float a0[4], a1[4], a2[4], a3[4];
-	float b0[4], b1[4], b2[4], b3[4];
+__m128 *_mm_multiplicar(__m128 a[4], __m128 b[4]) {
+	__m128 aux[4][4], *c;
+	int i, j;
 
-	__m128 resultado;
-	_mm_store_ps(elementos_a, a);
+	c = (__m128*)malloc(4*sizeof(__m128));
 
-		
+	juntarWXYZ(a);
+	juntarWXYZ(b);
+	
+	for(i = 0; i < 4; i++){
+		for(j = 0; j < 4; j++){
+			aux[i][j] = _mm_mul_ps(a[i], b[j]);
+		}
+	}
 
-	return resultado;
+	//c.w =  a.w*b.z + a.x*b.y - a.y*b.x + a.z*b.w;
+	c[0] = _mm_add_ps(aux[0][3],_mm_add_ps(aux[1][2],_mm_sub_ps(aux[3][0], aux[2][1])));
+	//c.x = -a.w*b.y + a.x*b.z + a.y*b.w + a.z*b.x;
+	c[1] = _mm_add_ps(aux[1][3],_mm_add_ps(aux[2][0],_mm_sub_ps(aux[3][1], aux[0][2])));
+	//c.y =  a.w*b.x - a.x*b.w + a.y*b.z + a.z*b.y;
+	c[2] = _mm_add_ps(aux[0][1],_mm_add_ps(aux[2][3],_mm_sub_ps(aux[3][2], aux[1][0])));
+	//c.z = -a.w*b.w - a.x*b.x - a.y*b.y + a.z*b.z;
+	c[3] = _mm_sub_ps(_mm_sub_ps(_mm_sub_ps(aux[3][3],aux[2][2]),aux[1][1]), aux[0][0]);
+	
+	separarWXYZ(c);
+
+	return c;
 }
 
 /* Set *hi and *lo to the high and low order bits of the cycle counter.

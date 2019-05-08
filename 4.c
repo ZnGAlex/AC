@@ -26,9 +26,9 @@ double get_counter();
 //MAIN
 int main(int argc, char* argv[]) {
 	double ck;
-	int N, q, k;
+	int N, q, k, numHilo;
 	cuaternion *a, *b, *c;
-	cuaternion quat, dp;
+	cuaternion quat, dp, *resul;
 	FILE *ptr;
 
 	if (argc != 4) {
@@ -47,10 +47,13 @@ int main(int argc, char* argv[]) {
 	N = pow(10.0, q);
 	k = atoi(argv[3]);
 
+	
+
 	/* Reserva de memoria para vectores de cuaterniones */
 	a = (cuaternion *) _mm_malloc(N * sizeof(cuaternion), 16);
 	b = (cuaternion *) _mm_malloc(N * sizeof(cuaternion), 16);
 	c = (cuaternion *) _mm_malloc(N * sizeof(cuaternion), 16);
+	resul = (cuaternion *) _mm_malloc(k * sizeof(cuaternion), 16);
 
 	
 	/* Inicializacion de valores de cuaterniones del vector a y b de cuaterniones */
@@ -58,38 +61,42 @@ int main(int argc, char* argv[]) {
 		inicializar_cuaternion_rand(&quat);
 		a[i] = quat;
 		inicializar_cuaternion_rand(&quat);
-		b[i] = quat;	
+		b[i] = quat;
 	}
 	
 	/* Inicializacion cuaternion dp */
 	inicializar_cuaternion(&dp);
-		
 
 	start_counter();  // START COUNTER
 
-	#pragma omp parallel num_threads(k)
+	#pragma omp parallel private(numHilo) num_threads(k)
 	{
+
+		numHilo = omp_get_thread_num();
 		
 		#pragma omp for
 		/* MULTIPLICACION C = A * B */
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < N; i++) {
 			c[i] = multiplicar_cuaternion(a[i], b[i]);
 		}
 		
-
-		#pragma omp barrier
 		
 		#pragma omp for
 		/* SUMA Y MULTIPLICACION DP = DP + C * C */
 		for(int i = 0; i < N; i++){
-			#pragma omp critical
-			{
-				dp = sumar_cuaternion(dp, multiplicar_cuaternion(c[i], c[i]));
-		
-			}
+			resul[numHilo] = sumar_cuaternion(resul[numHilo], multiplicar_cuaternion(c[i], c[i]));
 		}
 
+		#pragma omp single
+		{
+			for(int i = 0; i < k; i++){
+				dp = sumar_cuaternion(dp, resul[numHilo]);
+			}
+		}
 	}
+
+	
+
 	ck = get_counter(); // GET COUNTER
 	
 	/* Impresion de resultados */
@@ -104,6 +111,7 @@ int main(int argc, char* argv[]) {
 	_mm_free(a);
 	_mm_free(b);
 	_mm_free(c);
+	_mm_free(resul);
 
 	return 0;
 }

@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
 
 	/* MULTIPLICACION C = A * B */
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < N; i++) {
 		c[i] = multiplicar_cuaternion(a[i], b[i]);
 	}
 
